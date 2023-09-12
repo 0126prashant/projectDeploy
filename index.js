@@ -1,28 +1,39 @@
-// Importing all the required stuff
-const cors = require('cors');
 const express = require('express');
-const { PORT, connection } = require('./config/db');
-const { userRouter } = require('./routes/user.routes');
-const { postRouter } = require('./routes/post.routes');
-const { adminRouter } = require('./routes/admin.routes');
-const { regenerate } = require('./controllers/user.controllers');
-const { seedsRouter } = require('./routes/seeds.routes');
-
 const app = express();
 
-// In-built middlewares
+require('dotenv').config(); 
+const cors=require("cors");
 app.use(cors());
+const PORT = process.env.PORT || 3000;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const { OpenAIAPI } = require('openai');
+const openai = new OpenAIAPI({ key: OPENAI_API_KEY });
+
+
+// Middleware for parsing JSON requests
 app.use(express.json());
 
-// Routes
-app.get('/', (req, res) => {
-  res.status(200).send('<h1>Welcome to the GardenGuru fullstack API !!!</h1>');
-});
-app.get('/regenerate', regenerate);
-app.use('/users', userRouter);
-app.use('/posts', postRouter);
-app.use('/admin', adminRouter);
-app.use('/seeds', seedsRouter);
+app.post('/generate_shayari', async (req, res) => {
+    const keyword = req.body.keyword;
+  
+    // Use ChatGPT to generate Shayari
+    try {
+      const response = await openai.complete({
+        model: 'davinci', // You can try different models if needed
+        prompt: `Write me a Shayari on ${keyword}`,
+        maxTokens: 50, // Adjust as per your preference
+        n: 1
+      });
+      
+      const shayari = response.choices[0].text.trim();
+      res.json({ shayari });
+    } catch (error) {
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
 
-// Listening to the server
-app.listen(PORT, connection);
+// Start the server
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on ${process.env.PORT}`);
+});
