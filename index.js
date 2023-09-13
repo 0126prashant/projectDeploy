@@ -53,6 +53,120 @@ app.post('', async (req, res) => {
   }
 })
 
+
+// routes for send assignment CODE CONVERTER
+// Endpoint to handle code conversion
+app.get("/",(req,res)=>{
+  res.send("hello")
+})
+const GPT_API_KEY = process.env.OPENAI_API_KEY;
+app.post('/convert', async (req, res) => {
+  const { code, toLanguage } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ error: 'Invalid request. Please provide code' });
+  }
+
+  try {
+
+    // Call the ChatGPT API to convert code
+    const response = await axios.post(
+      'https://api.openai.com/v1/engines/text-davinci-003/completions',
+      {
+        prompt: `Convert this code to ${toLanguage}: ${code}`,
+        max_tokens: 150,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${GPT_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const convertedCode = response.data.choices[0].text.trim();
+    res.json({ convertedCode });
+  } catch (error) {
+    console.error('Error converting code:', error.message);
+    if (error.response) {
+      console.error('Response data:', error.response.data);
+    }
+    res.status(500).json({ error: 'Failed to convert code' });
+  }
+});
+
+app.post('/debug', async (req, res) => {
+  const { code } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ error: 'Invalid request. Please provide code, fromLanguage, and toLanguage.' });
+  }
+
+  try {
+
+    // Call the ChatGPT API to convert code
+    const response = await axios.post(
+      'https://api.openai.com/v1/engines/text-davinci-003/completions',
+      {
+        prompt: `${code} debug this code and provide what is write  what we have to change or put`,
+        max_tokens: 150,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${GPT_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const convertedCode = response.data.choices[0].text.trim();
+    res.json({ convertedCode });
+  } catch (error) {
+    console.error('Error converting code:', error.message);
+    if (error.response) {
+      console.error('Response data:', error.response.data);
+    }
+    res.status(500).json({ error: 'Failed to convert code' });
+  }
+});
+app.post('/check', async (req, res) => {
+  const { code,  toLanguage } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ error: 'Invalid request. Please provide code, fromLanguage, and toLanguage.' });
+  }
+
+  try {
+
+    // Call the ChatGPT API to convert code
+    const response = await axios.post(
+      'https://api.openai.com/v1/engines/text-davinci-003/completions',
+      {
+        prompt: `${code} provide me a quality check for this code with the percentage and some details`,
+        max_tokens: 150,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${GPT_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const convertedCode = response.data.choices[0].text.trim();
+    res.json({ convertedCode });
+  } catch (error) {
+    console.error('Error converting code:', error.message);
+    if (error.response) {
+      console.error('Response data:', error.response.data);
+    }
+    res.status(500).json({ error: 'Failed to convert code' });
+  }
+});
+
+
+
+
 app.listen(port, () => {
   console.log(`server is running on port ${port}`)
 })
