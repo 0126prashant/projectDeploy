@@ -83,7 +83,7 @@ app.post('/convert', async (req, res) => {
         },
       }
     );
-
+// console.log(response.data)
     const convertedCode = response.data.choices[0].text.trim();
     res.json({ convertedCode });
   } catch (error) {
